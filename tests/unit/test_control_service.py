@@ -179,3 +179,66 @@ def test_list_unclaimed_command_interfaces() -> None:
 
     assert len(unclaimed) == 1
     assert unclaimed[0].name == "joint1/position"
+
+
+def test_list_resource_claims() -> None:
+    """Return resource claims from claimed controller interfaces."""
+
+    class ClaimAdapter(FakeRos2ControlAdapter):
+        """Provide a controller with a claimed command interface."""
+
+        def list_controllers(self) -> tuple[Controller, ...]:
+            """Return a controller with one claimed interface."""
+            return (
+                Controller(
+                    name="arm_controller",
+                    controller_type=(
+                        "joint_trajectory_controller/"
+                        "JointTrajectoryController"
+                    ),
+                    state="active",
+                    claimed_interfaces=("joint1/position",),
+                ),
+            )
+
+    service = Ros2ControlService(ClaimAdapter())
+
+    claims = service.list_resource_claims()
+
+    assert len(claims) == 1
+    assert claims[0].controller_name == "arm_controller"
+    assert claims[0].interface_name == "joint1/position"
+
+
+def test_list_controller_dependencies() -> None:
+    """Return dependencies derived from controller chain connections."""
+    from ros2_control_mcp.domain.controllers import ChainConnection
+
+    class ChainAdapter(FakeRos2ControlAdapter):
+        """Provide chained controller data."""
+
+        def list_controllers(self) -> tuple[Controller, ...]:
+            """Return a controller with one chain dependency."""
+            return (
+                Controller(
+                    name="outer_controller",
+                    controller_type="test/OuterController",
+                    state="active",
+                    chain_connections=(
+                        ChainConnection(
+                            name="inner_controller",
+                            reference_interfaces=(
+                                "inner_controller/joint1/position",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+    service = Ros2ControlService(ChainAdapter())
+
+    dependencies = service.list_controller_dependencies()
+
+    assert len(dependencies) == 1
+    assert dependencies[0].controller_name == "outer_controller"
+    assert dependencies[0].depends_on == "inner_controller"

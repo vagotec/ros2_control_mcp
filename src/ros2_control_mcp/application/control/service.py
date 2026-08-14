@@ -1,5 +1,7 @@
 """Application service for ros2_control operations."""
 
+from ros2_control_mcp.domain.chains import ControllerDependency
+from ros2_control_mcp.domain.claims import ResourceClaim
 from ros2_control_mcp.domain.controllers import Controller, ControllerType
 from ros2_control_mcp.domain.hardware import HardwareComponent
 from ros2_control_mcp.domain.interfaces import HardwareInterface
@@ -69,4 +71,29 @@ class Ros2ControlService:
             interface
             for interface in command_interfaces
             if not interface.is_claimed
+        )
+
+    def list_resource_claims(self) -> tuple[ResourceClaim, ...]:
+        """Return command interface claims across all controllers."""
+        return tuple(
+            ResourceClaim(
+                interface_name=interface_name,
+                controller_name=controller.name,
+            )
+            for controller in self.list_controllers()
+            for interface_name in controller.claimed_interfaces
+        )
+
+    def list_controller_dependencies(
+        self,
+    ) -> tuple[ControllerDependency, ...]:
+        """Return dependencies between chained controllers."""
+        return tuple(
+            ControllerDependency(
+                controller_name=controller.name,
+                depends_on=connection.name,
+                reference_interfaces=connection.reference_interfaces,
+            )
+            for controller in self.list_controllers()
+            for connection in controller.chain_connections
         )

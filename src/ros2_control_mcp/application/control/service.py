@@ -97,3 +97,27 @@ class Ros2ControlService:
             for controller in self.list_controllers()
             for connection in controller.chain_connections
         )
+
+
+    def validate_controller_switch(
+        self,
+        plan: "ControllerSwitchPlan",
+    ) -> "SafetyResult":
+        """Validate a controller switch without executing it."""
+        from ros2_control_mcp.domain.safety import (
+            ControllerSwitchPlan,
+            SafetyResult,
+        )
+        from ros2_control_mcp.safety.evaluator import SafetyEvaluator
+
+        controllers = self.list_controllers()
+        command_interfaces, state_interfaces = self.list_hardware_interfaces()
+
+        evaluator = SafetyEvaluator()
+
+        return evaluator.validate_controller_switch(
+            plan=plan,
+            controllers=controllers,
+            command_interfaces=command_interfaces,
+            state_interfaces=state_interfaces,
+        )

@@ -6,10 +6,12 @@ from ros2_control_mcp.application.control.service import Ros2ControlService
 from ros2_control_mcp.mcp.prompts.diagnostics import register_diagnostic_prompts
 from ros2_control_mcp.mcp.prompts.inspection import register_inspection_prompts
 from ros2_control_mcp.mcp.resources.overview import register_overview_resource
+from ros2_control_mcp.mcp.resources.safety import register_safety_resource
 from ros2_control_mcp.mcp.resources.state_views import register_state_resources
 from ros2_control_mcp.mcp.tools.controllers import register_controller_tools
 from ros2_control_mcp.mcp.tools.hardware import register_hardware_tools
 from ros2_control_mcp.mcp.tools.relationships import register_relationship_tools
+from ros2_control_mcp.mcp.tools.safety import register_safety_tools
 from ros2_control_mcp.ros.jazzy.adapter import JazzyRos2ControlAdapter
 
 
@@ -22,8 +24,8 @@ def create_server() -> MCPServer:
         SERVER_NAME,
         instructions=(
             "Inspect ros2_control controllers, hardware, interfaces, claims, "
-            "and controller dependencies. Read-only inspection is currently "
-            "supported. Do not imply physical safety guarantees."
+            "and controller dependencies. Validate planned controller switches "
+            "before execution. Do not imply physical safety guarantees."
         ),
     )
 
@@ -32,9 +34,11 @@ def create_server() -> MCPServer:
     register_controller_tools(server, service)
     register_hardware_tools(server, service)
     register_relationship_tools(server, service)
+    register_safety_tools(server, service)
 
     register_overview_resource(server, service)
     register_state_resources(server, service)
+    register_safety_resource(server, service)
 
     register_inspection_prompts(server)
     register_diagnostic_prompts(server)

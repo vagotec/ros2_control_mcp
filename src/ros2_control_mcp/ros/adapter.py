@@ -3,6 +3,8 @@
 from abc import ABC, abstractmethod
 
 from ros2_control_mcp.domain.controllers import Controller, ControllerType
+from ros2_control_mcp.domain.hardware import HardwareComponent
+from ros2_control_mcp.domain.interfaces import HardwareInterface
 
 
 class Ros2ControlAdapter(ABC):
@@ -16,4 +18,16 @@ class Ros2ControlAdapter(ABC):
     @abstractmethod
     def list_controller_types(self) -> tuple[ControllerType, ...]:
         """Return the controller types known to the controller manager."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_hardware_components(self) -> tuple[HardwareComponent, ...]:
+        """Return hardware components known to the resource manager."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_hardware_interfaces(
+        self,
+    ) -> tuple[tuple[HardwareInterface, ...], tuple[HardwareInterface, ...]]:
+        """Return command and state interfaces from the resource manager."""
         raise NotImplementedError

@@ -1,0 +1,24 @@
+[project]
+name = "ros2-control-mcp"
+version = "0.1.0-dev"
+description = "MCP server for inspecting and safely managing ROS 2 Control systems."
+readme = "README.md"
+authors = [
+    { name = "vagotec", email = "sarvg@web.de" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=2,<3",
+]
+
+[project.scripts]
+ros2-control-mcp = "ros2_control_mcp.server:main"
+
+[build-system]
+requires = ["uv_build>=0.11.32,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+]

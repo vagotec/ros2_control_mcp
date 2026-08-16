@@ -1,4 +1,4 @@
-"""MCP tools for ros2_control hardware inspection."""
+"""MCP tools for ros2_control hardware operations."""
 
 from dataclasses import asdict
 from typing import Any
@@ -12,75 +12,64 @@ def register_hardware_tools(
     server: MCPServer,
     service: Ros2ControlService,
 ) -> None:
-    """Register read-only hardware tools on the MCP server."""
+    """Register ros2_control hardware tools."""
 
     def list_hardware_components() -> list[dict[str, Any]]:
-        """List ros2_control hardware components."""
+        """List hardware components."""
         return [
             asdict(component)
             for component in service.list_hardware_components()
         ]
 
-    def get_hardware_component(name: str) -> dict[str, Any] | None:
-        """Return details for one ros2_control hardware component."""
+    def get_hardware_component(
+        name: str,
+    ) -> dict[str, Any] | None:
+        """Get one hardware component."""
         component = service.get_hardware_component(name)
-        return asdict(component) if component is not None else None
 
-    def list_hardware_interfaces() -> dict[str, list[dict[str, Any]]]:
-        """List ros2_control command and state interfaces."""
-        command_interfaces, state_interfaces = (
-            service.list_hardware_interfaces()
+        if component is None:
+            return None
+
+        return asdict(component)
+
+    def set_hardware_component_state(
+        name: str,
+        state_id: int,
+        state_label: str,
+    ) -> dict[str, Any]:
+        """Change hardware component lifecycle state."""
+
+        result = service.set_hardware_component_state(
+            name=name,
+            state_id=state_id,
+            state_label=state_label,
         )
-        return {
-            "command_interfaces": [
-                asdict(interface) for interface in command_interfaces
-            ],
-            "state_interfaces": [
-                asdict(interface) for interface in state_interfaces
-            ],
-        }
 
-    def list_claimed_command_interfaces() -> list[dict[str, Any]]:
-        """List currently claimed ros2_control command interfaces."""
-        return [
-            asdict(interface)
-            for interface in service.list_claimed_command_interfaces()
-        ]
-
-    def list_unclaimed_command_interfaces() -> list[dict[str, Any]]:
-        """List currently unclaimed ros2_control command interfaces."""
-        return [
-            asdict(interface)
-            for interface in service.list_unclaimed_command_interfaces()
-        ]
+        return asdict(result)
 
     server.add_tool(
         list_hardware_components,
         name="list_hardware_components",
-        description="List ros2_control hardware components and states.",
+        description=(
+            "List ros2_control hardware components."
+        ),
         structured_output=True,
     )
+
     server.add_tool(
         get_hardware_component,
         name="get_hardware_component",
-        description="Get details for one ros2_control hardware component.",
+        description=(
+            "Get details about one ros2_control hardware component."
+        ),
         structured_output=True,
     )
+
     server.add_tool(
-        list_hardware_interfaces,
-        name="list_hardware_interfaces",
-        description="List ros2_control command and state interfaces.",
-        structured_output=True,
-    )
-    server.add_tool(
-        list_claimed_command_interfaces,
-        name="list_claimed_command_interfaces",
-        description="List currently claimed ros2_control command interfaces.",
-        structured_output=True,
-    )
-    server.add_tool(
-        list_unclaimed_command_interfaces,
-        name="list_unclaimed_command_interfaces",
-        description="List currently unclaimed ros2_control command interfaces.",
+        set_hardware_component_state,
+        name="set_hardware_component_state",
+        description=(
+            "Change ros2_control hardware component lifecycle state."
+        ),
         structured_output=True,
     )

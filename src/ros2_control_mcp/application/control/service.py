@@ -2,6 +2,7 @@
 
 from ros2_control_mcp.domain.chains import ControllerDependency
 from ros2_control_mcp.domain.claims import ResourceClaim
+from ros2_control_mcp.domain.control import ControlResult
 from ros2_control_mcp.domain.controllers import Controller, ControllerType
 from ros2_control_mcp.domain.hardware import HardwareComponent
 from ros2_control_mcp.domain.interfaces import HardwareInterface
@@ -33,6 +34,43 @@ class Ros2ControlService:
     def list_controller_types(self) -> tuple[ControllerType, ...]:
         """Return available controller types reported by ros2_control."""
         return self._adapter.list_controller_types()
+
+    def load_controller(self, name: str) -> ControlResult:
+        """Load a controller through ros2_control."""
+        return self._adapter.load_controller(name)
+
+    def configure_controller(self, name: str) -> ControlResult:
+        """Configure a controller through ros2_control."""
+        return self._adapter.configure_controller(name)
+
+    def activate_controller(self, name: str) -> ControlResult:
+        """Activate a controller through ros2_control."""
+        return self._adapter.activate_controller(name)
+
+    def deactivate_controller(self, name: str) -> ControlResult:
+        """Deactivate a controller through ros2_control."""
+        return self._adapter.deactivate_controller(name)
+
+    def unload_controller(self, name: str) -> ControlResult:
+        """Unload a controller through ros2_control."""
+        return self._adapter.unload_controller(name)
+
+    def cleanup_controller(self, name: str) -> ControlResult:
+        """Cleanup a controller through ros2_control."""
+        return self._adapter.cleanup_controller(name)
+
+    def set_hardware_component_state(
+        self,
+        name: str,
+        state_id: int,
+        state_label: str = "",
+    ) -> ControlResult:
+        """Change hardware component lifecycle state."""
+        return self._adapter.set_hardware_component_state(
+            name=name,
+            state_id=state_id,
+            state_label=state_label,
+        )
 
     def list_hardware_components(self) -> tuple[HardwareComponent, ...]:
         """Return hardware components reported by ros2_control."""
@@ -98,6 +136,39 @@ class Ros2ControlService:
             for connection in controller.chain_connections
         )
 
+
+
+    def execute_controller_switch(
+        self,
+        plan: "ControllerSwitchPlan",
+    ) -> ControlResult:
+        """Validate and execute a controller switch."""
+        from ros2_control_mcp.domain.safety import (
+            SafetyStatus,
+            SwitchStrictness,
+        )
+
+        if plan.strictness in {
+            SwitchStrictness.AUTO,
+            SwitchStrictness.FORCE_AUTO,
+        }:
+            return ControlResult(
+                ok=False,
+                message=(
+                    f"Strictness '{plan.strictness.value}' is not enabled "
+                    "for execution in this release."
+                ),
+            )
+
+        safety_result = self.validate_controller_switch(plan)
+
+        if safety_result.status is SafetyStatus.BLOCKED:
+            return ControlResult(
+                ok=False,
+                message="Controller switch blocked by safety validation.",
+            )
+
+        return self._adapter.switch_controllers(plan)
 
     def validate_controller_switch(
         self,

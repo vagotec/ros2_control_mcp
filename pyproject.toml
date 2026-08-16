@@ -1,6 +1,6 @@
 [project]
 name = "ros2-control-mcp"
-version = "0.1.0-dev"
+version = "0.1.0"
 description = "MCP server for inspecting and safely managing ROS 2 Control systems."
 readme = "README.md"
 authors = [

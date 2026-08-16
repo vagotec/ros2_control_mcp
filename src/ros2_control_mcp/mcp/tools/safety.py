@@ -44,3 +44,33 @@ def register_safety_tools(
         ),
         structured_output=True,
     )
+
+
+    def execute_controller_switch(
+        activate: list[str],
+        deactivate: list[str],
+        strictness: str = "strict",
+        timeout_seconds: float = 5.0,
+    ) -> dict[str, Any]:
+        """Validate and execute a ros2_control controller switch."""
+
+        plan = ControllerSwitchPlan(
+            activate=tuple(activate),
+            deactivate=tuple(deactivate),
+            strictness=SwitchStrictness(strictness),
+            timeout_seconds=timeout_seconds,
+        )
+
+        result = service.execute_controller_switch(plan)
+
+        return asdict(result)
+
+
+    server.add_tool(
+        execute_controller_switch,
+        name="execute_controller_switch",
+        description=(
+            "Validate and execute a ros2_control controller switch."
+        ),
+        structured_output=True,
+    )

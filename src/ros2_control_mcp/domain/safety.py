@@ -23,8 +23,10 @@ class SafetySeverity(StrEnum):
 class SwitchStrictness(StrEnum):
     """Represent ros2_control controller switch strictness."""
 
-    STRICT = "strict"
     BEST_EFFORT = "best_effort"
+    STRICT = "strict"
+    AUTO = "auto"
+    FORCE_AUTO = "force_auto"
 
 
 @dataclass(frozen=True)
@@ -34,6 +36,7 @@ class ControllerSwitchPlan:
     activate: tuple[str, ...] = field(default_factory=tuple)
     deactivate: tuple[str, ...] = field(default_factory=tuple)
     strictness: SwitchStrictness = SwitchStrictness.STRICT
+    activate_asap: bool = False
     timeout_seconds: float = 5.0
 
 

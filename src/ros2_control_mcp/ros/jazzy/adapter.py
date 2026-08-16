@@ -15,6 +15,11 @@ from controller_manager_msgs.srv import (
 from rclpy.node import Node
 
 from ros2_control_mcp.config.settings import Settings
+from ros2_control_mcp.domain.control import ControlResult
+from ros2_control_mcp.domain.safety import (
+    ControllerSwitchPlan,
+    SwitchStrictness,
+)
 from ros2_control_mcp.domain.controllers import (
     ChainConnection,
     Controller,
@@ -23,6 +28,7 @@ from ros2_control_mcp.domain.controllers import (
 from ros2_control_mcp.domain.hardware import HardwareComponent
 from ros2_control_mcp.domain.interfaces import HardwareInterface
 from ros2_control_mcp.ros.adapter import Ros2ControlAdapter
+from ros2_control_mcp.ros.jazzy.control import JazzyControllerManagerControl
 
 
 class JazzyRos2ControlAdapter(Ros2ControlAdapter):
@@ -137,6 +143,79 @@ class JazzyRos2ControlAdapter(Ros2ControlAdapter):
 
             if initialized_here:
                 rclpy.shutdown()
+
+    def load_controller(self, name: str) -> ControlResult:
+        """Load a controller through the Jazzy controller manager."""
+        control = JazzyControllerManagerControl(self._settings)
+        return control.load_controller(name)
+
+    def configure_controller(self, name: str) -> ControlResult:
+        """Configure a controller through the Jazzy controller manager."""
+        control = JazzyControllerManagerControl(self._settings)
+        return control.configure_controller(name)
+
+    def activate_controller(self, name: str) -> ControlResult:
+        """Activate a controller through the Jazzy controller manager."""
+        control = JazzyControllerManagerControl(self._settings)
+        return control.switch_controllers(
+            activate=(name,),
+            strictness=2,
+        )
+
+    def deactivate_controller(self, name: str) -> ControlResult:
+        """Deactivate a controller through the Jazzy controller manager."""
+        control = JazzyControllerManagerControl(self._settings)
+        return control.switch_controllers(
+            deactivate=(name,),
+            strictness=2,
+        )
+
+    def unload_controller(self, name: str) -> ControlResult:
+        """Unload a controller through the Jazzy controller manager."""
+        control = JazzyControllerManagerControl(self._settings)
+        return control.unload_controller(name)
+
+    def cleanup_controller(self, name: str) -> ControlResult:
+        """Cleanup a controller through the Jazzy controller manager."""
+        control = JazzyControllerManagerControl(self._settings)
+        return control.cleanup_controller(name)
+
+    def set_hardware_component_state(
+        self,
+        name: str,
+        state_id: int,
+        state_label: str = "",
+    ) -> ControlResult:
+        """Change hardware lifecycle state through Jazzy."""
+        control = JazzyControllerManagerControl(self._settings)
+
+        return control.set_hardware_component_state(
+            name=name,
+            state_id=state_id,
+            state_label=state_label,
+        )
+
+    def switch_controllers(
+        self,
+        plan: ControllerSwitchPlan,
+    ) -> ControlResult:
+        """Execute a controller switch through the Jazzy controller manager."""
+        strictness_map = {
+            SwitchStrictness.BEST_EFFORT: 1,
+            SwitchStrictness.STRICT: 2,
+            SwitchStrictness.AUTO: 3,
+            SwitchStrictness.FORCE_AUTO: 4,
+        }
+
+        control = JazzyControllerManagerControl(self._settings)
+
+        return control.switch_controllers(
+            activate=plan.activate,
+            deactivate=plan.deactivate,
+            strictness=strictness_map[plan.strictness],
+            activate_asap=plan.activate_asap,
+            timeout_seconds=plan.timeout_seconds,
+        )
 
     def list_hardware_components(self) -> tuple[HardwareComponent, ...]:
         """Return hardware components from the Jazzy resource manager."""

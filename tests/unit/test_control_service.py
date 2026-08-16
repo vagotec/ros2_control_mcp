@@ -1,6 +1,8 @@
 """Tests for the ros2_control application service."""
 
 from ros2_control_mcp.application.control.service import Ros2ControlService
+from ros2_control_mcp.domain.control import ControlResult
+from ros2_control_mcp.domain.safety import ControllerSwitchPlan
 from ros2_control_mcp.domain.controllers import Controller, ControllerType
 from ros2_control_mcp.domain.hardware import HardwareComponent
 from ros2_control_mcp.domain.interfaces import HardwareInterface
@@ -33,6 +35,76 @@ class FakeRos2ControlAdapter(Ros2ControlAdapter):
             ControllerType(
                 name="joint_state_broadcaster/JointStateBroadcaster",
                 base_class="controller_interface::ControllerInterface",
+            ),
+        )
+
+    def load_controller(self, name: str) -> ControlResult:
+        """Return a successful test load result."""
+        return ControlResult(
+            ok=True,
+            message=f"Loaded '{name}'.",
+        )
+
+    def configure_controller(self, name: str) -> ControlResult:
+        """Return a successful test configure result."""
+        return ControlResult(
+            ok=True,
+            message=f"Configured '{name}'.",
+        )
+
+    def activate_controller(self, name: str) -> ControlResult:
+        """Return a successful test activation result."""
+        return ControlResult(
+            ok=True,
+            message=f"Activated '{name}'.",
+        )
+
+    def deactivate_controller(self, name: str) -> ControlResult:
+        """Return a successful test deactivation result."""
+        return ControlResult(
+            ok=True,
+            message=f"Deactivated '{name}'.",
+        )
+
+    def switch_controllers(
+        self,
+        plan: ControllerSwitchPlan,
+    ) -> ControlResult:
+        """Return a successful test switch result."""
+        return ControlResult(
+            ok=True,
+            message=(
+                f"Activate={plan.activate}, "
+                f"Deactivate={plan.deactivate}"
+            ),
+        )
+
+    def unload_controller(self, name: str) -> ControlResult:
+        """Return a successful test unload result."""
+        return ControlResult(
+            ok=True,
+            message=f"Unloaded '{name}'.",
+        )
+
+    def cleanup_controller(self, name: str) -> ControlResult:
+        """Return a successful test cleanup result."""
+        return ControlResult(
+            ok=True,
+            message=f"Cleaned up '{name}'.",
+        )
+
+    def set_hardware_component_state(
+        self,
+        name: str,
+        state_id: int,
+        state_label: str = "",
+    ) -> ControlResult:
+        """Return a successful hardware state change result."""
+        return ControlResult(
+            ok=True,
+            message=(
+                f"Hardware '{name}' changed to "
+                f"{state_label or state_id}."
             ),
         )
 
@@ -242,3 +314,104 @@ def test_list_controller_dependencies() -> None:
     assert len(dependencies) == 1
     assert dependencies[0].controller_name == "outer_controller"
     assert dependencies[0].depends_on == "inner_controller"
+
+
+def test_load_controller() -> None:
+    """Load a controller through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.load_controller("test_controller")
+
+    assert result.ok is True
+    assert result.message == "Loaded 'test_controller'."
+
+
+def test_configure_controller() -> None:
+    """Configure a controller through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.configure_controller("test_controller")
+
+    assert result.ok is True
+    assert result.message == "Configured 'test_controller'."
+
+
+def test_activate_controller() -> None:
+    """Activate a controller through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.activate_controller("test_controller")
+
+    assert result.ok is True
+    assert result.message == "Activated 'test_controller'."
+
+
+def test_deactivate_controller() -> None:
+    """Deactivate a controller through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.deactivate_controller("test_controller")
+
+    assert result.ok is True
+    assert result.message == "Deactivated 'test_controller'."
+
+
+def test_execute_controller_switch() -> None:
+    """Execute a validated controller switch."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    plan = ControllerSwitchPlan()
+
+    result = service.execute_controller_switch(plan)
+
+    assert result.ok is True
+
+
+def test_execute_controller_switch_blocks_force_auto() -> None:
+    """Block FORCE_AUTO execution in the current release."""
+    from ros2_control_mcp.domain.safety import SwitchStrictness
+
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    plan = ControllerSwitchPlan(
+        strictness=SwitchStrictness.FORCE_AUTO,
+    )
+
+    result = service.execute_controller_switch(plan)
+
+    assert result.ok is False
+    assert "not enabled" in result.message
+
+
+def test_unload_controller() -> None:
+    """Unload a controller through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.unload_controller("test_controller")
+
+    assert result.ok is True
+    assert result.message == "Unloaded 'test_controller'."
+
+
+def test_cleanup_controller() -> None:
+    """Cleanup a controller through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.cleanup_controller("test_controller")
+
+    assert result.ok is True
+    assert result.message == "Cleaned up 'test_controller'."
+
+
+def test_set_hardware_component_state() -> None:
+    """Change hardware state through the application service."""
+    service = Ros2ControlService(FakeRos2ControlAdapter())
+
+    result = service.set_hardware_component_state(
+        name="MockSystem",
+        state_id=3,
+        state_label="active",
+    )
+
+    assert result.ok is True
+    assert "MockSystem" in result.message

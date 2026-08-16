@@ -16,7 +16,7 @@ Release preparation includes:
 - source installation, stdio/Codex registration, and package-build instructions
 - individual technical phase documents
 - changelog for 0.1.0
-- explicit open license decision
+- explicit Apache License 2.0 decision
 
 The locked MCP SDK baseline is `mcp 2.0.0`. The runtime entry point remains:
 
@@ -97,11 +97,11 @@ The documented baseline is 40 passing pytest tests, including five real Jazzy in
 - documentation follows the phase-file pattern used by the `ros2_mcp` reference project
 - technical content remains specific to `ros2_control_mcp`
 - no external project implementation is copied
-- no license is inferred without maintainer approval
+- Apache License 2.0 is recorded following maintainer approval
 
 ## Known Limitations
 
-- no license has been selected
+- Apache License 2.0 has been selected
 - no release commit or `v0.1.0` tag is created by this phase
 - test results are the recorded baseline until explicitly rerun during final verification
 

@@ -262,7 +262,7 @@ Before release:
 - README, installation, requirements, phases, and changelog must agree
 - the package entry point and MCP registration must be valid
 - the documented test baseline must pass in the Jazzy environment
-- licensing must be explicitly decided by the maintainer
+- licensing has been explicitly decided as Apache License 2.0 by the maintainer
 
 # 12. Current Baseline
 

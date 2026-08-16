@@ -568,7 +568,9 @@ The package version is defined in `pyproject.toml`. This documentation describes
 
 # License
 
-No project license has been selected or recorded. Distribution terms require a maintainer decision.
+Licensed under the Apache License 2.0.
+
+Copyright 2026 Vagotec.
 
 # Changelog
 
@@ -576,4 +578,4 @@ Release notes are maintained in [CHANGELOG.md](CHANGELOG.md).
 
 # Current Status
 
-The 0.1.0 implementation and its 40-test baseline are complete. Before publishing, the repository still requires a maintainer decision on licensing and the normal release workflow (final verification, commit, and tag).
+The 0.1.0 implementation and its 40-test baseline are complete. The project is licensed under the Apache License 2.0.

@@ -12,7 +12,7 @@ The phases describe logical areas of the implemented system. They do not claim a
 | 4 - MCP Controller and Hardware Capabilities | [README_PHASE_4.md](README_PHASE_4.md) | Complete |
 | 5 - Safety and Controller Switching | [README_PHASE_5.md](README_PHASE_5.md) | Complete |
 | 6 - Real ROS 2 Integration and MCP E2E Validation | [README_PHASE_6.md](README_PHASE_6.md) | Complete; recorded baseline 40 tests |
-| 7 - Release Preparation | [README_PHASE_7.md](README_PHASE_7.md) | Documentation prepared; license decision open |
+| 7 - Release Preparation | [README_PHASE_7.md](README_PHASE_7.md) | Documentation prepared; Apache License 2.0 selected |
 
 The current architecture is:
 
